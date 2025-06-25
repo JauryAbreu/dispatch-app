@@ -1,0 +1,95 @@
+﻿@model IEnumerable<dispatch_app.Models.Transactions.Customer>
+
+@{
+    ViewData["Title"] = "Listado de Clientes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]  <a asp-action="Create" class="btn btn-primary"><i class="fa fa-plus"></i> Nuevo</a></h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table id="datatable" class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Codigo</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Email</th>
+                                    <th>Rnc o Cedula</th>
+                                    <th>Empresa</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.CustomerId)
+                                        </td>
+                                        <td>
+                                            @(string.Format("{0} {1}", item.FirstName, item.LastName))
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.VatNumber)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Company)
+                                        </td>
+                                        <td style="text-align:right">
+
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary" title="Editar cliente">
+
+                                                <iconify-icon icon="solar:pen-2-bold"></iconify-icon>
+                                            </a>
+                                        </td>
+                                        <td style="text-align:right">
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" title="Eliminar cliente">
+
+                                                <iconify-icon icon="solar:trash-bin-2-bold"></iconify-icon>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+            order: [
+                [0, 'asc'],
+                [1, 'desc']
+            ],
+            fixedHeader: true,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+            });
+        });
+    </script>
+}

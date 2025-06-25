@@ -1,0 +1,52 @@
+﻿@model dispatch_app.Models.User.UpdateProfileModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Editar Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]</h5>
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Edit">
+
+                    <input type="hidden" asp-for="Id"/>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input asp-for="FirstName" class="form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Apellido</label>
+                                <input asp-for="LastName" class="form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input asp-for="Phone" class="form-control" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Perfil</label>
+                                <select asp-for="RoleName" class="form-control" asp-items="ViewBag.Roles">
+                                    <option value="">-- Seleccione un perfil --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" value="Create" class="btn btn-primary" onclick="return confirm('¿Estás seguro de que deseas actualizar el Usuario?')">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

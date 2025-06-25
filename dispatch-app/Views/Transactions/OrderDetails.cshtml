@@ -1,0 +1,132 @@
+﻿@model dispatch_app.Models.Transactions.TransactionModel
+
+@{
+    ViewData["Header"] = "Información de la orden";
+    ViewData["Title"] = "Detalles de la orden";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Header"]</h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Recibo</th>
+                                    <th>Cliente</th>
+                                    <th>Cantidad</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.ReceiptId)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Customer)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Qty)
+                                    </td>
+
+                                    <td>
+                                        @Model.CreatedDate
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Status)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]</h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table id="datatable" class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Sku</th>
+                                    <th>Codigo de Barra</th>
+                                    <th>Descripción</th>
+                                    <th>Cant. Vendida</th>
+                                    <th>Cant. Pendiente</th>
+                                    <th>Cant. Despachada</th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model.details)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Sku)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Barcode)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Description)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Total)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Pending)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Transfered)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+            order: [
+                [0, 'asc'],
+                [1, 'desc']
+            ],
+            fixedHeader: true,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+            });
+        });
+    </script>
+}

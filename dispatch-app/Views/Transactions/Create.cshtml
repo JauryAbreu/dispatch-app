@@ -1,0 +1,217 @@
+﻿@using dispatch_app.Models.Transactions
+@model TransactionModel
+
+@{
+    ViewData["Title"] = "Despacho";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistema de Despacho</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/dispatch.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="container" role="main" aria-label="Sistema de despacho">
+
+        <input type="hidden" value="@Model.Id" id="headerId"/>
+        <header>
+            <section class="table-card" aria-label="Informacion de Orden">
+                <div class="table-container" tabindex="0" aria-describedby="leftTableDesc" role="region" aria-live="polite" style="text-align:center">
+                    <table aria-multiselectable="true" role="grid">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center" scope="col">Recibo</th>
+                                <th style="text-align:center" scope="col">Cliente</th>
+                                <th style="text-align:center" scope="col">Fecha</th>
+                                <th style="text-align:center"  scope="col">Total de Articulos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr tabindex="0" role="row" aria-selected="false" data-code="A001" data-description="Producto Alpha" data-total="12" data-pendiente="12" data-transferido="0">
+                                <td>@Model.ReceiptId</td>
+                                <td>@Model.Customer</td>
+                                <td>@Model.CreatedDate</td>
+                                <td>@Model.Qty</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <br/>
+            <label for="searchInput" class="form-label visually-hidden">Buscar artículos</label>
+            <input type="search"
+                   id="searchInput"
+                   class="form-control"
+                   placeholder="Buscar artículos por Código..."
+                   autocomplete="off"
+                   aria-describedby="searchHelp"
+                   spellcheck="false" />
+        </header>
+        <section class="dispatch-system" aria-live="polite">
+            <!-- Left table -->
+            <section class="table-card" aria-label="Artículos disponibles">
+                <h2>Artículos Disponibles</h2>
+                <div class="table-container" tabindex="0" aria-describedby="leftTableDesc" role="region" aria-live="polite">
+                    <table id="leftTable" aria-multiselectable="true" role="grid" summary="Lista de artículos disponibles para despacho" >
+                        <thead>
+                            <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Cod. Barra</th>
+                                <th scope="col">Descripción</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Pendiente</th>
+                                <th scope="col">Transferido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.details)
+                            {
+                                <tr tabindex="0" role="row" aria-selected="false" data-code="@item.Sku" data-barcode="@item.Barcode"
+                                    data-description="@item.Description" data-total="@item.Total"
+                                    data-pendiente="@item.Pending" data-transferido="@item.Transfered">
+                                    <td>@item.Sku</td>
+                                    <td>@item.Barcode</td>
+                                    <td>@item.Description</td>
+                                    <td>@item.Total</td>
+                                    <td>@item.Pending</td>
+                                    <td>@item.Transfered</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div id="leftTableDesc" class="visually-hidden">
+                    Lista de artículos disponibles para despacho
+                </div>
+            </section>
+            <nav class="move-buttons" aria-label="Controles para mover artículos">
+                <button type="button" id="btnToRight" disabled aria-disabled="true" aria-controls="rightTable" aria-live="polite" aria-atomic="true" title="Enviar artículo seleccionado a la derecha">
+                    Enviar a Despachado &rarr;
+                </button>
+                <button type="button" id="btnToLeft" disabled aria-disabled="true" aria-controls="leftTable" aria-live="polite" aria-atomic="true" title="Enviar artículos seleccionados a la izquierda">
+                    &larr; Enviar a Disponible
+                </button>
+                <button type="button" id="btnChangeStatus" disabled aria-disabled="true" aria-live="polite" aria-atomic="true" title="Cambiar estado de artículos seleccionados">
+                    Cambiar Estado
+                </button>
+                <button type="button" id="btnComplete" disabled aria-disabled="true" aria-live="polite" aria-atomic="true" title="Completar el proceso y enviar datos al servidor">
+                    Despachar Articulos
+                </button>
+                <button type="button" id="btnCancel" aria-live="polite" aria-atomic="true" title="Cancelar el proceso y regresar al inicio">
+                    Cancelar
+                </button>
+            </nav>
+            <section class="table-card" aria-label="Artículos en despacho">
+                <h2>Artículos en Despacho</h2>
+                <div class="table-container" tabindex="0" aria-describedby="rightTableDesc" role="region" aria-live="polite">
+                    <table id="rightTable" aria-multiselectable="true" role="grid" summary="Lista de artículos preparados para despacho">
+                        <thead>
+                            <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Cod. Barra</th>
+                                <th scope="col">Descripción</th>
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">BIN</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Initially empty -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="rightTableDesc" class="visually-hidden">
+                    Lista de artículos preparados para despacho
+                </div>
+            </section>
+        </section>
+        <!-- Modals -->
+        <div class="modal fade" id="binModal" tabindex="-1" aria-labelledby="binModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header border-bottom-1">
+                        <h5 class="modal-title" id="binModalLabel">Ingresar BIN</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="binInput" class="form-label">BIN (Ubicación de almacen):</label>
+                        <input type="text" id="binInput" class="form-control" placeholder="Ej: B12-3" autocomplete="off" aria-describedby="binHelp" />
+                        <div id="binError" class="invalid-feedback"></div>
+                    </div>
+                    <div class="modal-footer border-top-1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="binSubmitBtn">Aceptar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="quantityModal" tabindex="-1" aria-labelledby="quantityModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header border-bottom-1">
+                        <h5 class="modal-title" id="quantityModalLabel">Cantidad a Transferir</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="quantityInput" class="form-label">Cantidad (máximo <span id="maxQuantityLabel"></span>):</label>
+                        <input type="number" id="quantityInput" class="form-control" min="1" step="1" autocomplete="off" aria-describedby="quantityHelp" />
+                        <div id="quantityError" class="invalid-feedback"></div>
+                    </div>
+                    <div class="modal-footer border-top-1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="quantitySubmitBtn">Transferir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header border-bottom-1">
+                        <h5 class="modal-title" id="cancelModalLabel">Confirmar Cancelación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Está seguro que desea cancelar el proceso y regresar al inicio? Los cambios no guardados se perderán.</p>
+                    </div>
+                    <div class="modal-footer border-top-1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-danger" id="cancelConfirmBtn">Sí, Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header border-bottom-1">
+                        <h5 class="modal-title" id="completeModalLabel">Confirmar Completar Proceso</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Desea completar el proceso y enviar los artículos en despacho al servidor?</p>
+                    </div>
+                    <div class="modal-footer border-top-1">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-success" id="completeConfirmBtn">Sí, Completar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous" defer></script>
+
+    <script src="~/js/dispatch.js"></script>
+</body>
+</html>

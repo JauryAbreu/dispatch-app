@@ -1,0 +1,109 @@
+﻿@model IEnumerable<dispatch_app.Models.Transactions.Header>
+
+@{
+    ViewData["Title"] = "Listado de Ordenes por Usuario no completadas";
+    ViewData["Filter"] = "Filtra las órdenes según un rango de fechas. <br/>Selecciona una fecha de inicio y una fecha final.";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]</h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table id="datatable" class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Tienda</th>
+                                    <th>Recibo</th>
+                                    <th>Cliente</th>
+                                    <th>Ncf</th>
+                                    <th>Cant. Vendida</th>
+                                    <th>Cant. Despachada</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr >
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.StoreCode)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ReceiptId)
+                                        </td>
+                                        <td>
+                                            @(string.IsNullOrEmpty(item.customer.Company) ? string.Format("{0} {1}", item.customer.FirstName, item.customer.LastName) : item.customer.Company)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.fiscal.NCFNumber)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Quantity)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.QuantityDispatched)
+                                        </td>
+                                        <td>
+                                            @(Convert.ToDateTime(item.CreatedDate).ToString("dd/MM/yyyy hh:mm tt"))
+                                        </td>
+                                        <td>
+                                        @if (item.Status == dispatch_app.Models.Transactions.DeliveryStatusEnum.Entrega_Completada)
+                                        {
+                                            <span class="badge bg-light-success rounded-pill text-success px-3 py-2 fs-3">Completado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light-warning rounded-pill text-warning px-3 py-2 fs-3">@item.Status.ToString()</span>
+                                        }
+                                        </td>
+
+                                        <td style="text-align:right">
+                                            <a asp-action="Create" asp-route-id="@item.Id" class="btn btn-success" title="Despachar">
+                                                <iconify-icon icon="solar:user-check-bold"></iconify-icon> Despachar
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+            order: [
+                [0, 'asc'],
+                [1, 'desc']
+            ],
+            fixedHeader: true,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,164 @@
+﻿@model IEnumerable<dispatch_app.Models.Transactions.Header>
+
+@{
+    ViewData["Title"] = "Listado de Ordenes";
+    ViewData["Filter"] = "Filtra las órdenes según un rango de fechas. <br/>Selecciona una fecha de inicio y una fecha final.";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<header class="app-header">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="navbar-nav">
+
+            <h5 class="card-title fw-semibold mb-4">@Html.Raw(ViewData["Filter"])</h5>
+        </div>
+        <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <form asp-action="Orders" method="post" class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">Fecha de Inicio</label>
+                    <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha Final</label>
+                    <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                </div>
+                <div class="col-md-4 align-self-end">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </nav>
+</header>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]</h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table id="datatable" class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Tienda</th>
+                                    <th>Recibo</th>
+                                    <th>Cliente</th>
+                                    <th>Ncf</th>
+                                    <th>Cant. Vendida</th>
+                                    <th>Cant. Despachada</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr >
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.StoreCode)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ReceiptId)
+                                        </td>
+                                        <td>
+                                            @(string.IsNullOrEmpty(item.customer.Company) ? string.Format("{0} {1}", item.customer.FirstName, item.customer.LastName) : item.customer.Company)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.fiscal.NCFNumber)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Quantity)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.QuantityDispatched)
+                                        </td>
+                                        <td>
+                                            @(Convert.ToDateTime(item.CreatedDate).ToString("dd/MM/yyyy hh:mm tt"))
+                                        </td>
+                                        <td>
+                                        @if (item.Status == dispatch_app.Models.Transactions.DeliveryStatusEnum.Entrega_Completada)
+                                        {
+                                            <span class="badge bg-light-success rounded-pill text-success px-3 py-2 fs-3">Completado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light-warning rounded-pill text-warning px-3 py-2 fs-3">Pendiente</span>
+                                            }
+                                        </td>
+                                        <td style="text-align:left">
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Opciones
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" asp-action="OrderDetails" asp-route-id="@item.Id">
+                                                            <iconify-icon icon="solar:bill-list-bold"></iconify-icon> Orden Detallada
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" asp-action="OrderPrint" asp-route-id="@item.Id">
+                                                            <iconify-icon icon="solar:printer-2-bold"></iconify-icon> Imprimir Orden
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" asp-action="OrderAssign" asp-route-id="@item.Id">
+                                                            <iconify-icon icon="solar:user-bold"></iconify-icon> Asignar Prioridad (Despachador)
+                                                        </a>
+                                                    </li>
+                                                    @if (item.QuantityPending == 0 && item.Status != dispatch_app.Models.Transactions.DeliveryStatusEnum.Entrega_Completada)
+                                                    {
+                                                        <li>
+                                                            <a class="dropdown-item" asp-action="StatusComplete" asp-route-id="@item.Id" onclick="return confirm('¿Estás seguro de que deseas cambiar el estado a Completado?')">
+                                                                <iconify-icon icon="solar:clipboard-list-bold"></iconify-icon> Cambiar a Completado
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" asp-action="UpdateCreatedDate" asp-route-id="@item.Id" onclick="return confirm('¿Estás seguro de que deseas cambiar la fecha de esta orden a la actual y colocar el estado pendiente?')">
+                                                                <iconify-icon icon="solar:clipboard-list-bold"></iconify-icon> Cambiar Fecha y Estado
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+            order: [
+                [0, 'asc'],
+                [1, 'desc']
+            ],
+            fixedHeader: true,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+            });
+        });
+    </script>
+}

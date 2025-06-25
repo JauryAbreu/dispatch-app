@@ -1,0 +1,140 @@
+﻿@using dispatch_app.Models.User
+@model dispatch_app.Models.Transactions.TransactionModel
+
+@{
+    ViewData["Header"] = "Información de la orden";
+    ViewData["Title"] = "Asignar Prioridad a Orden";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var users = ViewBag.Users as List<ApplicationUser>;
+}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">
+            @ViewData["Header"]  
+        </h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Recibo</th>
+                                    <th>Cliente</th>
+                                    <th>Cantidad</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.ReceiptId)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Customer)
+                                    </td>
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Qty)
+                                    </td>
+
+                                    <td>
+                                        @Model.CreatedDate
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => Model.Status)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]
+            <a asp-action="OrderAssignUser" asp-route-id="@Model.Id" class="btn btn-primary" title="Asignar Prioridad sin Despachador">  <iconify-icon icon="solar:check-read-bold"></iconify-icon> Priorizar</a>
+        </h5>
+
+        <div class="x_content">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card-box table-responsive">
+                        <table id="datatable" class="table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Appelido</th>
+                                    <th>Correo</th>
+                                    <th>Telefono</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in users)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.UserName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.FirstName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.LastName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Phone)
+                                        </td>                                            
+                                        <td style="text-align:right">
+                                            <a asp-action="OrderAssignUser" asp-route-user="@item.Id" asp-route-id="@Model.Id" class="btn btn-success" title="Asignar Despachador">
+                                                <iconify-icon icon="solar:user-check-bold"></iconify-icon> Asignar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#datatable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+            order: [
+                [0, 'asc'],
+                [1, 'desc']
+            ],
+            fixedHeader: true,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+            });
+        });
+    </script>
+}

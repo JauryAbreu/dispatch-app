@@ -1,0 +1,125 @@
+﻿@using dispatch_app.Models.Transactions
+@model List<Header>
+@{
+    ViewData["Title"] = "Pantalla de Despacho con Cuenta Regresiva";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="30">
+    <title>@ViewData["Title"]</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css"
+          rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/dispatch.css" asp-append-version="true" />
+</head>
+<body>
+    @if (TempData[dispatch_app.Models.MessageEnum.Success.ToString()] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            <span>
+                <strong>Proceso Exitoso! </strong> @TempData[dispatch_app.Models.MessageEnum.Success.ToString()]
+            </span>
+        </div>
+    }
+    else if (TempData[dispatch_app.Models.MessageEnum.Error.ToString()] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <span>
+                <strong>Error! </strong> @TempData[dispatch_app.Models.MessageEnum.Error.ToString()]
+            </span>
+        </div>
+    }
+    else if (TempData[dispatch_app.Models.MessageEnum.Warning.ToString()] != null)
+    {
+        <div class="alert alert-warning" role="alert">
+            <span>
+                <strong>Precaución! </strong> @TempData[dispatch_app.Models.MessageEnum.Warning.ToString()]
+            </span>
+        </div>
+    }
+    else if (TempData[dispatch_app.Models.MessageEnum.Information.ToString()] != null)
+    {
+        <div class="alert alert-info" role="alert">
+            <span>
+                <strong>Información! </strong> @TempData[dispatch_app.Models.MessageEnum.Information.ToString()]
+            </span>
+        </div>
+    }
+    <main class="container" role="main" style="margin-top:3%">
+        <section class="btn-group-top"
+                 aria-label="Acciones principales"
+                 role="region">
+            <a type="button"
+               class="btn-large"
+               id="btnCerrarSesion"
+               asp-action="Logout"
+               asp-controller="Security"
+               title="Cerrar Sesión">
+                Cerrar Sesión
+            </a>
+            <a type="button"
+                     class="btn-large"
+                     id="btnDetener"
+                     asp-action="Index"
+                     asp-controller="Home"
+                     title="Menu de Inicio">
+                Inicio
+            </a>
+            <a type="button"
+               class="btn-large"
+               id="btnSiguienteDespachar"
+               asp-action="Create"
+               asp-controller="Transactions"
+               title="Siguiente a despacharn">
+                Siguiente a despachar
+            </a>
+        </section>
+        <br />
+        <section class="table-card" aria-label="Informacion de Orden">
+            <div class="table-container" tabindex="0" aria-describedby="leftTableDesc" role="region" aria-live="polite" style="text-align:center">
+                <table aria-multiselectable="true" role="grid">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center" scope="col">Recibo</th>
+                            <th style="text-align:center" scope="col">Cliente</th>
+                            <th style="text-align:center" scope="col">Fecha</th>
+                            <th style="text-align:center" scope="col">Total de Articulos</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@(item.ReceiptId)</td>
+                                <td>@(string.IsNullOrEmpty(item.customer.Company) ? string.Format("{0} {1}", item.customer.FirstName, item.customer.LastName) : item.customer.Company)</td>
+                                <td>@(Convert.ToDateTime(item.CreatedDate).ToString("dd-MM-yyyy hh:mm"))</td>
+                                <td>@(Convert.ToInt32(item.Quantity).ToString("###,###"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- Bootstrap Bundle JS (includes Popper for Modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.js"></script>
+
+    <script src="~/js/options.js"></script>
+</body>
+</html>
+

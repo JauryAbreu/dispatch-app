@@ -1,0 +1,334 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using dispatch_app.Utils
+@{
+    string group = Context.Session.GetString("GroupId") ?? string.Empty;
+}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link rel="shortcut icon" type="image/png" href="~/lib/template/images/logos/logo-sanut.png" />
+    <link rel="stylesheet" href="~/css/styles.min.css" asp-append-version="true" />
+
+    <link href="~/css/light-bootstrap-dashboard.css" rel="stylesheet">
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!--  Body Wrapper -->
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+         data-sidebar-position="fixed" data-header-position="fixed">
+
+        <!--  App Topstrip -->
+        <div class="app-topstrip bg-dark py-6 px-3 w-100 d-lg-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-center gap-5 mb-2 mb-lg-0">
+            </div>
+
+            <div class="d-lg-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+
+                    <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+                        <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link " href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <img src="~/lib/template/images/profile/user1.jpg" alt="" width="35" height="35"
+                                         class="rounded-circle">
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                                    <div class="message-body">
+                                        <a asp-controller="Account" asp-action="EditProfile" class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-user fs-6"></i>
+                                            <p class="mb-0 fs-3">Perfil</p>
+                                        </a>
+                                        <a asp-controller="Account" asp-action="EditPassword" class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-mail fs-6"></i>
+                                            <p class="mb-0 fs-3">Cambiar Contraseña</p>
+                                        </a>
+
+                                        <a asp-controller="Account" asp-action="2FactAuth" class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-mail fs-6"></i>
+                                            <p class="mb-0 fs-3">Autenticacion en 2 factores</p>
+                                        </a>
+                                        <a asp-controller="Security" asp-action="LogOut"
+                                           class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar">
+            <!-- Sidebar scroll-->
+            <div>
+                <div class="brand-logo d-flex align-items-center justify-content-between">
+                    <a asp-action="Index" asp-controller="Home" class="text-nowrap logo-img">
+                        <img src="~/lib/template/images/logos/logo-sanut.png" alt="" width="150" style="margin-top: 25px; margin-left:35px;"  />
+                    </a>
+                    <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+                        <i class="ti ti-x fs-8"></i>
+                    </div>
+                </div>
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                            <span class="hide-menu">DashBoard</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link primary-hover-bg" asp-controller="Home" asp-action="Index" aria-expanded="false">
+                                <iconify-icon icon="solar:atom-line-duotone"></iconify-icon>
+                                <span class="hide-menu">Inicio</span>
+                            </a>
+                        </li>
+                        <li>
+                            <span class="sidebar-divider lg"></span>
+                        </li>
+                        <li class="nav-small-cap">
+                            <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                            <span class="hide-menu">Despachador</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link primary-hover-bg" asp-controller="Transactions" asp-action="Index" aria-expanded="false">
+                                <iconify-icon icon="solar:delivery-bold"></iconify-icon>
+                                <span class="hide-menu">Despacho</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link primary-hover-bg" asp-controller="Transactions" asp-action="UserOrders" aria-expanded="false">
+                                <iconify-icon icon="solar:shield-warning-bold"></iconify-icon>
+                                <span class="hide-menu">Pendientes</span>
+                            </a>
+                        </li>
+
+                        @if (group == RoleLevel.Supervisor.ToString() || group == RoleLevel.Admin.ToString())
+                        {
+                            <li>
+                                <span class="sidebar-divider lg"></span>
+                            </li>
+                            <li class="nav-small-cap">
+                                <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                                <span class="hide-menu">Ordenes</span>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link primary-hover-bg justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                    <div class="d-flex align-items-center gap-6">
+                                        <span class="d-flex">
+                                            <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
+                                        </span>
+                                        <span class="hide-menu">Transacciones</span>
+                                    </div>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Transactions" asp-action="Orders">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Listado</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Stores" asp-action="Index">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Tiendas</span>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </li>
+                            <li>
+                                <span class="sidebar-divider lg"></span>
+                            </li>
+                            <li class="nav-small-cap">
+                                <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                                <span class="hide-menu">Clientes</span>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link primary-hover-bg justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                    <div class="d-flex align-items-center gap-6">
+                                        <span class="d-flex">
+                                            <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
+                                        </span>
+                                        <span class="hide-menu">Clientes</span>
+                                    </div>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Customers" asp-action="Index">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Listado</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Customers" asp-action="Create">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Crear</span>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </li>
+
+                            <li>
+                                <span class="sidebar-divider lg"></span>
+                            </li>
+                            <li class="nav-small-cap">
+                                <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                                <span class="hide-menu">Usuarios</span>
+                            </li>
+
+                            <li class="sidebar-item">
+                                <a class="sidebar-link primary-hover-bg justify-content-between has-arrow" href="javascript:void(0)"
+                                aria-expanded="false">
+                                    <div class="d-flex align-items-center gap-6">
+                                        <span class="d-flex">
+                                            <iconify-icon icon="solar:user-bold"></iconify-icon>
+                                        </span>
+                                        <span class="hide-menu">Usuarios</span>
+                                    </div>
+                                </a>
+                                <ul aria-expanded="false" class="collapse first-level">
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Users" asp-action="Index">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Listado</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Users" asp-action="Create">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Crear</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a class="sidebar-link primary-hover-bg justify-content-between"
+                                        asp-controller="Users" asp-action="UserGroup">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <span class="d-flex">
+                                                    <span class="icon-small"></span>
+                                                </span>
+                                                <span class="hide-menu">Grupo de Usuarios</span>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </li>
+
+                        }
+                    </ul>
+                </nav>
+                <!-- End Sidebar navigation -->
+            </div>
+            <!-- End Sidebar scroll-->
+        </aside>
+        <!--  Sidebar End -->
+        <!--  Main wrapper -->
+        <div class="body-wrapper">
+
+            <div class="body-wrapper-inner">
+                <div class="container-fluid">
+                    @if (TempData[dispatch_app.Models.MessageEnum.Success.ToString()] != null)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <span>
+                                <strong>Proceso Exitoso! </strong> @TempData[dispatch_app.Models.MessageEnum.Success.ToString()]
+                            </span>
+                        </div>
+                    }
+                    else if (TempData[dispatch_app.Models.MessageEnum.Error.ToString()] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <span>
+                                <strong>Error! </strong> @TempData[dispatch_app.Models.MessageEnum.Error.ToString()]
+                            </span>
+                        </div>
+                    }
+                    else if (TempData[dispatch_app.Models.MessageEnum.Warning.ToString()] != null)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <span>
+                                <strong>Precaución! </strong> @TempData[dispatch_app.Models.MessageEnum.Warning.ToString()]
+                            </span>
+                        </div>
+                    }
+                    else if (TempData[dispatch_app.Models.MessageEnum.Information.ToString()] != null)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <span>
+                                <strong>Información! </strong> @TempData[dispatch_app.Models.MessageEnum.Information.ToString()]
+                            </span>
+                        </div>
+                    }
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/lib/template/libs/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/template/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/sidebarmenu.js"></script>
+    <script src="~/js/app.min.js"></script>
+    <script src="~/lib/template/libs/simplebar/dist/simplebar.js"></script>
+    <script src="~/js/datatables/dataTables.js"></script>
+    <script src="~/js/datatables/dataTables.buttons.js"></script>
+    <script src="~/js/datatables/buttons.dataTables.js"></script>
+    <script src="~/js/datatables/buttons.html5.min.js"></script>
+    <script src="~/js/datatables/buttons.print.min.js"></script>
+    <script src="~/js/datatables/jszip.min.js"></script>
+    <script src="~/js/datatables/pdfmake.min.js"></script>
+    <script src="~/js/datatables/vfs_fonts.js"></script>
+
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</body>
+
+</html>
+
+@RenderSection("Scripts", required: false)
