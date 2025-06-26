@@ -34,6 +34,15 @@
     const selectedRightRows = new Set();
     let pendingBIN = '';
 
+    // Configurar enfoque para modales
+    binModalEl.addEventListener('shown.bs.modal', () => {
+        binInput.focus();
+    });
+
+    quantityModalEl.addEventListener('shown.bs.modal', () => {
+        quantityInput.focus();
+    });
+
     // Utility functions
     function updateButtonsState() {
         btnToRight.disabled = !selectedLeftRow;
@@ -174,7 +183,6 @@
         binError.textContent = '';
         binInput.classList.remove('is-invalid');
         binModal.show();
-        setTimeout(() => binInput.focus(), 310);
     }
     binSubmitBtn.addEventListener('click', () => {
         const val = binInput.value.trim();
@@ -193,7 +201,6 @@
         quantityError.textContent = '';
         quantityInput.classList.remove('is-invalid');
         quantityModal.show();
-        setTimeout(() => quantityInput.focus(), 310);
     });
     quantitySubmitBtn.addEventListener('click', () => {
         const valStr = quantityInput.value.trim();
@@ -354,7 +361,7 @@
                 Status: parseInt(row.dataset.estado, 10) // Send enum value to server
             });
         });
-        console.log(dataToSend)
+        console.log(dataToSend);
         const id = document.getElementById("headerId").value;
         console.log(id);
         try {

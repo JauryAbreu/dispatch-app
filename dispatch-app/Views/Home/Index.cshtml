@@ -181,7 +181,7 @@
                 gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
 
                 // Obtener datos desde tu endpoint
-                const response = await fetch("/Home/GetMainData?user="+ '@userId'); // ajusta la URL según corresponda
+                const response = await fetch("/Home/GetMainData?userId="+ '@userId'); // ajusta la URL según corresponda
                 const result = await response.json();
                 const chartData = result.chartData || [];
 

@@ -50,7 +50,7 @@ namespace dispatch_app.Controllers
             }
         }
 
-        private async Task<MainData> GetMainDataAsync(string? userId)
+        public async Task<MainData> GetMainDataAsync(string? userId)
         {
             var today = DateTime.Now.Date;
             var headersQuery = _context.Headers

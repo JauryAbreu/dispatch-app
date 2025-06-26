@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace dispatch_app.Controllers
 {
@@ -27,17 +23,14 @@ namespace dispatch_app.Controllers
         public TransactionsController(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            AuthUtil authUtil,
-            TransactionUtil transactionUtil,
-            ProfileUtil profileUtil,
             IOptions<SmtpSettings> smtpSettings,
             IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
-            _authUtil = authUtil;
-            _transactionUtil = transactionUtil;
-            _profileUtil = profileUtil;
+            _authUtil = new AuthUtil(configuration, userManager);
+            _transactionUtil = new TransactionUtil();
+            _profileUtil = new ProfileUtil(userManager);
             _smtpSettings = smtpSettings.Value;
             _configuration = configuration;
         }
@@ -64,7 +57,8 @@ namespace dispatch_app.Controllers
 
             return await _context.Headers
                 .AsNoTracking()
-                .Where(h => h.CreatedDate >= DateTime.Now.Date)
+                .Where(h => h.CreatedDate >= DateTime.Now.Date && 
+                (h.Status == DeliveryStatusEnum.En_Proceso || h.Status == DeliveryStatusEnum.Pendiente))
                 .OrderBy(h => h.IsAssigned == true ? 0 : 1)
                 .ThenBy(h => h.CreatedDate)
                 .FirstOrDefaultAsync(h =>
@@ -187,6 +181,10 @@ namespace dispatch_app.Controllers
                 }
 
                 var transaction = await _transactionUtil.GetCurrentTransactionAsync(_context, header);
+
+                if (transaction.details.Sum(a => a.Pending) == 0)
+                    return RedirectToAction("DispatchReport", "Report", new { id = header.Id });
+
                 return View(transaction);
             }
             catch (Exception ex)
@@ -243,7 +241,7 @@ namespace dispatch_app.Controllers
                         Barcode = item.Barcode,
                         Quantity = item.Quantity,
                         Description = item.Description,
-                        Status = item.Status,
+                        Status = DeliveryStatusEnum.Entrega_Completada,
                         UserCode = userId,
                         Notes = string.Empty,
                         CanBeDispatched = true,

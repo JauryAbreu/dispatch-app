@@ -33,7 +33,9 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"]</h5>
+        <h5 class="card-title fw-semibold mb-4">@ViewData["Title"] 
+            <a asp-controller="Report" asp-action="DispatchItemsReport" asp-route-startDate="@ViewBag.StartDate" asp-route-endDate="@ViewBag.EndDate" class="btn btn-primary" target="_blank">
+                <i class="fa fa-plus"></i> Imprimir</a></h5>
 
         <div class="x_content">
             <div class="row">
@@ -103,7 +105,7 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item" asp-action="OrderPrint" asp-route-id="@item.Id">
+                                                        <a class="dropdown-item" asp-controller="Report" asp-action="DispatchReport" asp-route-id="@item.Id" target="_blank">
                                                             <iconify-icon icon="solar:printer-2-bold"></iconify-icon> Imprimir Orden
                                                         </a>
                                                     </li>

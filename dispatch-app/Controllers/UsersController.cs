@@ -17,12 +17,11 @@ namespace dispatch_app.Controllers
 
         public UsersController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
-            ProfileUtil profileUtil)
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _profileUtil = profileUtil;
+            _profileUtil = new ProfileUtil(userManager);
         }
 
         private async Task<List<SelectListItem>> GetRolesAsync()
@@ -67,14 +66,13 @@ namespace dispatch_app.Controllers
                 var users = await _userManager.Users
                     .ToListAsync();
 
-                var result = await Task.WhenAll(users.Select(async user =>
+                foreach (var user in users)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
                     user.RoleName = roles.FirstOrDefault() ?? "Sin rol";
-                    return user;
-                }));
+                }
 
-                return View(result);
+                return View(users);
             }
             catch (Exception ex)
             {
@@ -99,10 +97,10 @@ namespace dispatch_app.Controllers
         {
             var redirect = await CheckAccessAsync("crear");
             if (redirect != null) return redirect;
+            ViewBag.Roles = await GetRolesAsync();
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Roles = await GetRolesAsync();
                 return View(model);
             }
 
@@ -175,9 +173,9 @@ namespace dispatch_app.Controllers
             var redirect = await CheckAccessAsync("editar");
             if (redirect != null) return redirect;
 
+            ViewBag.Roles = await GetRolesAsync();
             if (!ModelState.IsValid)
             {
-                ViewBag.Roles = await GetRolesAsync();
                 return View(model);
             }
 

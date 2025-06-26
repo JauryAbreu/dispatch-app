@@ -35,13 +35,13 @@ namespace dispatch_app.Utils
                     Sku = g.Key.Sku,
                     Barcode = g.Key.Barcode,
                     Description = g.Key.Description,
-                    Total = (int)g.Sum(x => x.Quantity ?? 0),
-                    Transfered = (int)g.Where(x => x.Status != DeliveryStatusEnum.Pendiente && x.Status != DeliveryStatusEnum.No_Aplica)
-                                 .Sum(x => x.Quantity ?? 0),
-                    Pending = (int)g.Where(x => x.Status == DeliveryStatusEnum.Pendiente)
-                              .Sum(x => x.Quantity ?? 0)
+                    Total = (int)g.Where(x => x.Status == DeliveryStatusEnum.Pendiente).Sum(x => x.Quantity ?? 0),
+                    Transfered = (int)g.Where(x => x.Status == DeliveryStatusEnum.Entrega_Completada)
+                                 .Sum(x => x.Quantity ?? 0)
                 })
                 .ToList();
+            foreach (var item in groupedDetails)
+                item.Pending = item.Total - item.Transfered;
 
             return new TransactionModel
             {
@@ -52,7 +52,7 @@ namespace dispatch_app.Utils
                     ? $"{header.customer.FirstName} {header.customer.LastName}".Trim()
                     : header.customer.Company,
                 CreatedDate = header.CreatedDate?.ToString("dd-MM-yyyy hh:mm tt") ?? "Sin fecha",
-                Status = header.Status.ToString(),
+                Status = header.Status.ToString().Replace("_", " "),
                 details = groupedDetails
             };
         }

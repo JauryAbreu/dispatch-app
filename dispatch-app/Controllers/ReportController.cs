@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace dispatch_app.Controllers
 {
@@ -15,25 +16,22 @@ namespace dispatch_app.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly AuthUtil _authUtil;
-        private readonly TransactionUtil _transactionUtil;
         private readonly ProfileUtil _profileUtil;
         private readonly SmtpSettings _smtpSettings;
+        private readonly TransactionUtil _transactionUtil;
         private readonly IConfiguration _configuration;
 
         public ReportController(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            AuthUtil authUtil,
-            TransactionUtil transactionUtil,
-            ProfileUtil profileUtil,
             IOptions<SmtpSettings> smtpSettings,
             IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
-            _authUtil = authUtil;
-            _transactionUtil = transactionUtil;
-            _profileUtil = profileUtil;
+            _authUtil = new AuthUtil(configuration, userManager);
+            _transactionUtil = new TransactionUtil();
+            _profileUtil = new ProfileUtil(userManager);
             _smtpSettings = smtpSettings.Value;
             _configuration = configuration;
         }
@@ -69,7 +67,6 @@ namespace dispatch_app.Controllers
                     return RedirectToAction("Orders", "Transactions");
                 }
 
-                ViewBag.Users = await _userManager.GetUsersInRoleAsync(RoleLevel.Dispatcher.ToString());
                 var transaction = await _transactionUtil.GetCurrentTransactionAsync(_context, header, false);
                 return View(transaction);
             }
@@ -98,8 +95,8 @@ namespace dispatch_app.Controllers
                     return View(new List<TransactionModel>());
                 }
 
-                ViewBag.StartDate = start.ToString("yyyy-MM-dd");
-                ViewBag.EndDate = end.ToString("yyyy-MM-dd");
+                ViewBag.StartDate = start.ToString("dd/MM/yyyy");
+                ViewBag.EndDate = end.ToString("dd/MM/yyyy");
 
                 var transactions = await _context.Headers
                     .AsNoTracking()
@@ -118,8 +115,8 @@ namespace dispatch_app.Controllers
                                 $"{c.VatNumber} - {c.Company}".Trim())
                             .FirstOrDefault() ?? string.Empty,
                         Qty = h.Quantity ?? 0,
-                        Status = h.Status == DeliveryStatusEnum.Entrega_Completada ? "Completada" : "Parcial",
-                        CreatedDate = Convert.ToDateTime(h.CreatedDate).ToString("dd-MM-yyyy") ?? string.Empty,
+                        Status = h.Status.ToString().Replace("_", " "),
+                        CreatedDate = Convert.ToDateTime(h.CreatedDate).ToString("dd/MM/yyyy hh:mm tt") ?? string.Empty,
                         details = _context.Lines
                             .Where(l => l.HeaderId == h.Id)
                             .GroupBy(l => new { l.Sku, l.Barcode, l.Description })
@@ -128,12 +125,12 @@ namespace dispatch_app.Controllers
                                 Sku = g.Key.Sku,
                                 Barcode = g.Key.Barcode,
                                 Description = g.Key.Description,
-                                Total = (int)g.Sum(x => x.Quantity ?? 0),
-                                Transfered = (int)g.Where(x => x.Status != DeliveryStatusEnum.Pendiente && x.Status != DeliveryStatusEnum.No_Aplica)
+                                Total = (int)g.Where(x => x.Status == DeliveryStatusEnum.Pendiente).Sum(x => x.Quantity ?? 0),
+                                Transfered = (int)g.Where(x => x.Status == DeliveryStatusEnum.Entrega_Completada)
                                              .Sum(x => x.Quantity ?? 0),
-                                Pending = (int)g.Where(x => x.Status == DeliveryStatusEnum.Pendiente)
+                                Pending = (int)g.Where(x => x.Status == DeliveryStatusEnum.En_Proceso || x.Status == DeliveryStatusEnum.Pendiente_Despacho)
                                           .Sum(x => x.Quantity ?? 0)
-                            })
+                                        })
                             .ToList()
                     })
                     .ToListAsync();

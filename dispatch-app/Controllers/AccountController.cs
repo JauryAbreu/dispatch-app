@@ -1,6 +1,5 @@
 ﻿using dispatch_app.Models.User;
 using dispatch_app.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

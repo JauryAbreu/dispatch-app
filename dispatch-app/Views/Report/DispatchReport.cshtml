@@ -1,0 +1,231 @@
+﻿@using dispatch_app.Models.Transactions
+@model TransactionModel
+@{
+    ViewData["Title"] = "Reporte de Despacho de Mercancía";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>@ViewData["Title"]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: system-ui, 'Segoe UI', sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .report-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .report-header .date-generated {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .filters {
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+        }
+
+            .filters span {
+                font-weight: 600;
+            }
+
+        .date-right {
+            font-size: 0.9rem;
+            text-align: right;
+            color: #666;
+        }
+
+        table {
+            font-size: 0.82rem;
+        }
+
+        .table thead th {
+            background-color: #212529;
+            color: #fff;
+            vertical-align: middle;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+            border: 1px solid #dee2e6;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            color: #666;
+            position: fixed;
+            bottom: 1cm;
+            left: 0;
+            width: 100%;
+        }
+
+        .table-no-border, .table-no-border td, .table-no-border th {
+            border: 0 !important;
+        }
+
+        .signature-section {
+            margin-top: 5rem;
+            page-break-before: auto; 
+            page-break-inside: avoid;
+        }
+
+            .signature-section .row {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .signature-section .row > div {
+                text-align: center;
+                padding: 2rem 1rem 0;
+                border-top: 1px solid #000;
+                flex: 0 0 45%;
+                margin: 0 2.5%;
+            }
+
+                .signature-section .row > div span {
+                    font-weight: bold;
+                }
+
+        @@media print {
+            .footer {
+                position: fixed;
+                bottom: 1cm;
+            }
+
+            .signature-section {
+                page-break-before: auto;
+                page-break-inside: avoid;
+            }
+
+            .table thead {
+                display: table-header-group;
+            }
+            
+            .table th {
+                background-color: #5E5E5E !important;
+                -webkit-print-color-adjust: exact; /* Para Chrome/Edge */
+                print-color-adjust: exact; /* Estándar para otros navegadores */
+            }
+
+            @@page {
+                margin: 0.5cm;
+            }
+
+            .page-number {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="~/lib/template/images/logos/logo-sanut.png" alt="Logo" style="width: 10%;">
+    </div>
+
+    <div class="report-header">
+        <h1>@ViewData["Title"]</h1>
+        <div class="date-generated">
+            Fecha de Impresión: <span>@DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt", new System.Globalization.CultureInfo("es-ES"))</span>
+        </div>
+    </div>
+
+    <table class="table table-no-border mb-4" style="border-spacing: 0; border-collapse: collapse;">
+        <tbody>
+            <tr>
+                <td style="padding: 2px;"><b>Recibo:</b> <span>@Model.ReceiptId</span></td>
+                <td style="padding: 2px;"><b>Cantidad Total:</b> <span>@Model.Qty</span></td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;"><b>Cliente:</b> <span>@Model.Customer</span></td>
+                <td style="padding: 2px;"><b>Estado:</b> <span>@Model.Status</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Barcode</th>
+                    <th>Description</th>
+                    <th>Total</th>
+                    <th>Pendientes</th>
+                    <th>Despachado</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in Model.details)
+                {
+                    <tr>
+                        <td>@transaction.Sku</td>
+                        <td>@transaction.Barcode</td>
+                        <td>@transaction.Description</td>
+                        <td>@transaction.Total</td>
+                        <td>@transaction.Pending</td>
+                        <td>@transaction.Transfered</td>
+                        <td>@(transaction.Pending <= 0 ? "Entregado" : "Pendiente")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="signature-section">
+        <div class="row">
+            <div>
+                <span>Firma del Cliente</span>
+            </div>
+            <div>
+                <span>Firma del Despachador</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Página <span class="page-number"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('beforeprint', () => {
+            const pageHeight = 1123; // A4 height in pixels at 96 DPI (297mm * 3.78 pixels/mm)
+            const margin = 48; // 0.5cm margin in pixels (0.5cm * 96 DPI / 2.54 cm/inch)
+            const contentHeight = document.body.scrollHeight;
+            const totalPages = Math.ceil((contentHeight + margin) / (pageHeight - 2 * margin));
+
+            const pageNumberSpans = document.querySelectorAll('.page-number');
+            pageNumberSpans.forEach((span, index) => {
+                span.textContent = `${index + 1} de ${totalPages}`;
+            });
+        });
+    </script>
+</body>
+</html>
